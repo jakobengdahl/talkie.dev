@@ -317,3 +317,41 @@ const responseContainer = document.getElementById('chat-messages');
 //let user_prompt = "How are you feeling?"
 //send_prompt(user_prompt)
 
+//
+// Anpassning: Hämta API-nyckel via URL och skicka introduktionsprompt en gång
+//
+
+(function initNullTraceKeyAndPrompt() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const encodedKey = urlParams.get('key');
+
+  if (encodedKey) {
+    try {
+      const decodedKey = atob(encodedKey);
+      user_data['settings']['service_settings']['api_key'] = decodedKey;
+      openai = new OpenAI(decodedKey);
+    } catch {
+      alert("Felaktig API-nyckel i URL:en.");
+    }
+  }
+
+  // Lägg till system prompt i messages om saknas
+  if (!messages.some(msg => msg.role === "system")) {
+    messages.push({
+      role: "system",
+      content: user_data.model.system_prompt
+    });
+  }
+
+  // Skicka introduktionsprompt från hårdkodad sträng om det inte redan gjorts
+  if (
+    !sessionStorage.getItem("hasIntroduced") &&
+    user_data['settings']['service_settings']['api_key']
+  ) {
+    const initialPrompt = `Hej. Jag är Agent Echo, tränad av NullTrace för att guida dig genom denna utmaning.
+Fråga mig om teknik, kod, nästa steg eller be om en ledtråd. Lycka till – vi har väntat på dig.`;
+
+    send_prompt(initialPrompt);
+    sessionStorage.setItem("hasIntroduced", "true");
+  }
+})();
