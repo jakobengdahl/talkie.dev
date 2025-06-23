@@ -316,11 +316,12 @@ const responseContainer = document.getElementById('chat-messages');
 //let user_prompt = "Generate an image of a zebra climbing a tree"
 //let user_prompt = "How are you feeling?"
 //send_prompt(user_prompt)
-//
-// Anpassning: Hämta API-nyckel via URL och visa introduktion EN gång
-//
+
 
 (function initNullTraceKeyAndPrompt() {
+  const agent_system_prompt = `Du är Agent Echo, en teknisk assistent tränad av NullTrace. 
+Du är hjälpsam, pedagogisk och uppmuntrar spelaren att tänka själv. Svara tydligt, gärna med exempel.`;
+
   const urlParams = new URLSearchParams(window.location.search);
   const encodedKey = urlParams.get('key');
 
@@ -350,11 +351,11 @@ const responseContainer = document.getElementById('chat-messages');
   if (!messages.some(msg => msg.role === "system")) {
     messages.push({
       role: "system",
-      content: user_data.model.system_prompt
+      content: agent_system_prompt
     });
   }
 
-  // Visa introduktion en gång (utan att skicka prompt till modellen)
+  // Visa introduktion en gång (utan att skicka prompt till API)
   if (!sessionStorage.getItem("hasIntroduced") && user_data['settings']['service_settings']['api_key']) {
     const introText = `Hej. Jag är Agent Echo, tränad av NullTrace för att guida dig genom denna utmaning.
 Fråga mig om teknik, kod, nästa steg eller be om en ledtråd. Lycka till – vi har väntat på dig.`;
