@@ -17,6 +17,7 @@
   </style>
 
   <script>
+    // Hämta nyckel från URL-parametern ?key (base64-kodad)
     const urlParams = new URLSearchParams(window.location.search);
     const encodedKey = urlParams.get('key');
     const decodedKey = encodedKey ? atob(encodedKey) : null;
@@ -31,7 +32,7 @@
 
       if (!key) {
         const msg = document.createElement("div");
-        msg.textContent = "Agent Echo: Jag är offline. Ange en API-nyckel via ?key=...";
+        msg.textContent = "Agent Echo: Jag är offline. Lägg till ?key=... i URL:en.";
         chatMessages.appendChild(msg);
         return;
       }
