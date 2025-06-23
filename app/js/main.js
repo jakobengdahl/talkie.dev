@@ -329,17 +329,24 @@ const responseContainer = document.getElementById('chat-messages');
       const decodedKey = atob(encodedKey);
       user_data['settings']['service_settings']['api_key'] = decodedKey;
       openai = new OpenAI(decodedKey);
+
+      // Dölj welcome-container
+      const welcome = document.querySelector("#welcome-container");
+      if (welcome) {
+        welcome.classList.add("hidden");
+      }
+
     } catch {
       alert("Felaktig API-nyckel i URL:en.");
     }
   }
 
-  // Om vi har en giltig nyckel, visa chattfältet direkt
+  // Visa chattfält om API-nyckel finns
   if (user_data['settings']['service_settings']['api_key']) {
     document.querySelector("footer").classList.remove("hidden");
   }
 
-  // Lägg till system prompt i messages om saknas
+  // Lägg till system prompt om den inte redan finns
   if (!messages.some(msg => msg.role === "system")) {
     messages.push({
       role: "system",
@@ -347,18 +354,15 @@ const responseContainer = document.getElementById('chat-messages');
     });
   }
 
-  // Visa introduktionstext i chatten, men skicka inte som prompt till API
-  if (
-    !sessionStorage.getItem("hasIntroduced") &&
-    user_data['settings']['service_settings']['api_key']
-  ) {
-    const initialPrompt = `Hej. Jag är Agent Echo, tränad av NullTrace för att guida dig genom denna utmaning.
+  // Visa introduktion en gång (utan att skicka prompt till modellen)
+  if (!sessionStorage.getItem("hasIntroduced") && user_data['settings']['service_settings']['api_key']) {
+    const introText = `Hej. Jag är Agent Echo, tränad av NullTrace för att guida dig genom denna utmaning.
 Fråga mig om teknik, kod, nästa steg eller be om en ledtråd. Lycka till – vi har väntat på dig.`;
 
-    const msg = document.createElement("article");
-    msg.classList.add("message", "message-received");
-    msg.innerHTML = initialPrompt;
-    document.getElementById("chat-messages").appendChild(msg);
+    const introMsg = document.createElement("article");
+    introMsg.classList.add("message", "message-received");
+    introMsg.innerHTML = introText;
+    document.getElementById("chat-messages").appendChild(introMsg);
 
     sessionStorage.setItem("hasIntroduced", "true");
   }
