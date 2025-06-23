@@ -1,161 +1,84 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="sv">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta content='yes' name='apple-mobile-web-app-capable'/>
-    <meta content='yes' name='mobile-web-app-capable'/>
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-touch-fullscreen" content="yes">
-    <meta name="apple-mobile-web-app-title" content="talkie.dev">
-    <link rel="apple-touch-icon" href="/images/icon.png">
-    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NullTrace</title>
 
-    <title>talkie.dev</title>
-    <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.colors.min.css"
-        />
-    <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.classless.amber.min.css"
-        />
-    <link rel="stylesheet" href="css/style.css">
+  <!-- Stilmallar -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.colors.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.classless.amber.min.css" />
+  <link rel="stylesheet" href="app/css/style.css" />
+
+  <style>
+    nav, #about-container, #model-container, #settings-container, #welcome-container, footer p {
+      display: none !important;
+    }
+  </style>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const encodedKey = urlParams.get('key');
+    const decodedKey = encodedKey ? atob(encodedKey) : null;
+
+    if (decodedKey) {
+      sessionStorage.setItem("OPENAI_API_KEY", decodedKey);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const key = sessionStorage.getItem("OPENAI_API_KEY");
+      const chatMessages = document.getElementById("chat-messages");
+
+      if (!key) {
+        const msg = document.createElement("div");
+        msg.textContent = "Agent Echo: Jag är offline. Ange en API-nyckel via ?key=...";
+        chatMessages.appendChild(msg);
+        return;
+      }
+
+      if (!sessionStorage.getItem("hasIntroduced")) {
+        const script = document.createElement("script");
+        script.src = "app/prompt.js";
+        script.onload = () => {
+          if (typeof initialPrompt === "string") {
+            const msg = document.createElement("div");
+            msg.textContent = "Agent Echo: " + initialPrompt;
+            chatMessages.appendChild(msg);
+            sessionStorage.setItem("hasIntroduced", "true");
+          }
+        };
+        document.body.appendChild(script);
+      }
+    });
+  </script>
 </head>
 
 <body>
-    <header>
-        <hgroup>
-            <h1>Talkie</h1>
-            
-        </hgroup>
+  <header>
+    <hgroup>
+      <h1>NullTrace</h1>
+    </hgroup>
+  </header>
 
-        <nav>
-            <ul>
-                <li><a href="#" data-nav="about">About</a></li>
-                <li><a href="#" data-nav="model">Model</a></li>
-                <li><a href="#" data-nav="settings">Settings</a></li>
-            </ul>
-        </nav>
+  <main>
+    <div class="chat-container">
+      <div class="chat-window">
+        <div class="chat-messages" id="chat-messages"></div>
+      </div>
+    </div>
+  </main>
 
-        <section id="about-container" class="hidden">
-            <h4>About</h4>
-            <p>Talkie is minimalist, responsive, local storage, privacy focused interface for LLMs. That means:</p>
-            <ul>
-                <li>It is simple and easy to use</li>
-                <li>It should work on any device</li>
-                <li>API keys and settings are stored in your browser <strong>only</strong></li>
-                <li>It does not log any chats</li>
-            </ul>
+  <footer>
+    <form id="send-prompt">
+      <fieldset class="grid">
+        <textarea id="user-prompt" placeholder="Skriv ditt meddelande här..." autofocus></textarea>
+        <button type="submit">Skicka</button>
+      </fieldset>
+    </form>
+  </footer>
 
-            <p>I built this because I wanted a tool to interact with LLM APIs that didn't require signups, data collection, and would work everywhere.</p>
-
-            <h4>Tips</h4>
-            <ul>
-                <li>You can save this app to your home screen for easier access.</li>
-                <li>Pressing Ctrl+Enter will submit the prompt without having to click.</li>
-            </ul>
-
-            <p>Made by <a href="https://bertwagner.com">Bert Wagner</a>.</p>
-        </section>
-
-        <section id="model-container" class="hidden">
-            <h4>Model</h4>
-            <form id="model">
-                <fieldset>
-                    <label>System Prompt
-                    <textarea id="model__system_prompt" placeholder="System prompt"></textarea>
-                    </label>
-                    <label>
-                        <input id="model__json_mode" type="checkbox" role="switch" />
-                        JSON Output
-                      </label>
-                    <label>Image Generation Size
-                    <select id="model__image_generation_size">
-                        <option value="1024x1024">1024x1024</option>
-                        <option value="1792x1024">1792x1024</option>
-                        <option value="1024x1792">1024x1792</option>
-                    </select>
-                    </label>
-                    <label>Image Generation Style
-                        <select id="model__image_generation_style">
-                            <option value="vivid">Vivid</option>
-                            <option value="natural">Natural</option>
-                        </select>
-                        </label>
-                </fieldset>
-
-                <button type="submit">Save</button>
-            </form>
-        </section>
-
-        <section id="settings-container" class="hidden">
-            <h4>Settings</h4>
-            <form id="settings">
-                <fieldset>
-                    <label>Text Model
-                    <select id="settings__service_settings__llm_model">
-                        <option value="gpt-4o">gpt-4o</option>
-                        <option value="gpt-4">gpt-4</option>
-                        <option value="gpt-4-turbo">gpt-4-turbo</option>
-                        <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
-                    </select>
-                    </label>
-                    <label>OpenAI key
-                    <input id="settings__service_settings__api_key" type="password" />
-                    </label>
-                    <label>Image Model
-                        <select id="settings__service_settings__image_generation_model">
-                            <option value="dall-e-3">dall-e-3</option>
-                        </select>
-                        </label>
-                </fieldset>
-                <button type="submit">Save</button>
-            </form>
-        </section>
-
-        <section id="welcome-container" class="hidden">
-            <h4>Welcome!</h4>
-            <p>To get started, you must supply an OpenAI API key. You can <a href="https://platform.openai.com/signup" target="_blank">regsiter for an OpenAI account</a> or <a href="https://platform.openai.com/login" target="_blank">sign in to your OpenAI account</a>, then generate a new secret key from the <a href="https://platform.openai.com/account/api-keys" target="_blank">API key page</a>.</p>
-            <form id="welcome">
-                <fieldset>
-                    <label>OpenAI key
-                    <input id="welcome_api_key" type="password" />
-                    </label>
-                </fieldset>
-                <button type="submit">Save</button>
-            </form>
-        </section>
-
-    </header>
-    
-    <main>
-        <div class="chat-container">
-            <div class="chat-window">
-                <div class="chat-messages" id="chat-messages">
-
-                </div>
-                
-            </div>
-        </div>
-    </main>
-
-
-    <footer>
-        <p><a id="clear" href="#">Clear conversation</a></p>
-        <form id="send-prompt">
-            <fieldset class="grid">
-                <textarea id="user-prompt" placeholder="Type your message..." autofocus="true"></textarea> 
-                <button type="submit">Send</button>
-            </fieldset>
-        </form>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"></script>
-    <script src="js/openai.js"></script>
-    <script src="js/main.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"></script>
+  <script src="app/js/openai.js"></script>
+  <script src="app/js/main.js"></script>
 </body>
-
 </html>
