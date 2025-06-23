@@ -8,7 +8,7 @@
   <!-- Stilmallar -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.colors.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.classless.amber.min.css" />
-  <link rel="stylesheet" href="app/css/style.css" />
+  <link rel="stylesheet" href="css/style.css" />
 
   <style>
     nav, #about-container, #model-container, #settings-container, #welcome-container, footer p {
@@ -38,7 +38,7 @@
 
       if (!sessionStorage.getItem("hasIntroduced")) {
         const script = document.createElement("script");
-        script.src = "app/prompt.js";
+        script.src = "prompt.js";
         script.onload = () => {
           if (typeof initialPrompt === "string") {
             const msg = document.createElement("div");
@@ -78,7 +78,7 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"></script>
-  <script src="app/js/openai.js"></script>
-  <script src="app/js/main.js"></script>
+  <script src="js/openai.js"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>
