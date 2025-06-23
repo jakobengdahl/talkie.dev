@@ -316,9 +316,8 @@ const responseContainer = document.getElementById('chat-messages');
 //let user_prompt = "Generate an image of a zebra climbing a tree"
 //let user_prompt = "How are you feeling?"
 //send_prompt(user_prompt)
-
 //
-// Anpassning: Hämta API-nyckel via URL och skicka introduktionsprompt en gång
+// Anpassning: Hämta API-nyckel via URL och visa introduktion EN gång
 //
 
 (function initNullTraceKeyAndPrompt() {
@@ -335,6 +334,11 @@ const responseContainer = document.getElementById('chat-messages');
     }
   }
 
+  // Om vi har en giltig nyckel, visa chattfältet direkt
+  if (user_data['settings']['service_settings']['api_key']) {
+    document.querySelector("footer").classList.remove("hidden");
+  }
+
   // Lägg till system prompt i messages om saknas
   if (!messages.some(msg => msg.role === "system")) {
     messages.push({
@@ -343,7 +347,7 @@ const responseContainer = document.getElementById('chat-messages');
     });
   }
 
-  // Skicka introduktionsprompt från hårdkodad sträng om det inte redan gjorts
+  // Visa introduktionstext i chatten, men skicka inte som prompt till API
   if (
     !sessionStorage.getItem("hasIntroduced") &&
     user_data['settings']['service_settings']['api_key']
@@ -351,7 +355,11 @@ const responseContainer = document.getElementById('chat-messages');
     const initialPrompt = `Hej. Jag är Agent Echo, tränad av NullTrace för att guida dig genom denna utmaning.
 Fråga mig om teknik, kod, nästa steg eller be om en ledtråd. Lycka till – vi har väntat på dig.`;
 
-    send_prompt(initialPrompt);
+    const msg = document.createElement("article");
+    msg.classList.add("message", "message-received");
+    msg.innerHTML = initialPrompt;
+    document.getElementById("chat-messages").appendChild(msg);
+
     sessionStorage.setItem("hasIntroduced", "true");
   }
 })();
